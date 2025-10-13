@@ -1,181 +1,130 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Ficha Técnica - {{ evento.nome }}</title>
+{% block title %}Ficha de Evento - {{ evento.nome }}{% endblock %}
 
-  <style>
-    body {
-      font-family: "Arial", sans-serif;
-      font-size: 13px;
-      margin: 2cm;
-      color: #333;
-    }
+{% block content %}
+<div class="mx-auto max-w-5xl bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
 
-    h1, h2 {
-      color: #005ca9;
-      margin-bottom: 0.3em;
-    }
+  <header class="border-b border-slate-200 pb-6">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900">{{ evento.nome }}</h1>
+    <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-2 text-sm text-slate-600">
+      <p><strong>Tipo:</strong> Ficha Técnica de Evento</p>
+      <p><strong>Data:</strong> {{ evento.data|date:"d/m/Y" }}</p>
+      <p><strong>Nº de Pessoas:</strong> {{ evento.numero_pessoas }}</p>
+    </div>
+  </header>
 
-    h1 {
-      font-size: 22px;
-      border-bottom: 2px solid #005ca9;
-      padding-bottom: 4px;
-    }
+  <div class="mt-8 space-y-12">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-x-12 gap-y-12">
+      
+      <div class="lg:col-span-3 space-y-12">
+        <section>
+          <h2 class="text-xl font-semibold text-slate-800 mb-4">🍽️ Cardápio</h2>
+          <div class="overflow-x-auto rounded-lg border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+              <thead class="bg-slate-50"><tr class="text-left">
+                <th class="py-3 px-4 font-semibold text-slate-700">Receita</th>
+                <th class="py-3 px-4 font-semibold text-slate-700 text-center">Porções/pessoa</th>
+                <th class="py-3 px-4 font-semibold text-slate-700 text-right">Custo Total (R$)</th>
+              </tr></thead>
+              <tbody class="bg-white divide-y divide-slate-200">
+                {% for item in itens %}
+                <tr>
+                  <td class="py-3 px-4 font-medium text-slate-800">{{ item.receita.titulo }}</td>
+                  <td class="py-3 px-4 text-slate-600 text-center">{{ item.porcoes_por_pessoa }}</td>
+                  <td class="py-3 px-4 text-slate-600 text-right">{{ item.custo_total }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="py-8 text-center text-slate-500">Nenhum item de cardápio adicionado.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0 24px 0;
-      font-size: 12px;
-    }
+        <section>
+          <h2 class="text-xl font-semibold text-slate-800 mb-4">👨‍🍳 Equipe</h2>
+          <div class="overflow-x-auto rounded-lg border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+              <thead class="bg-slate-50"><tr class="text-left">
+                <th class="py-3 px-4 font-semibold text-slate-700">Função</th>
+                <th class="py-3 px-4 font-semibold text-slate-700 text-center">Qtd</th>
+                <th class="py-3 px-4 font-semibold text-slate-700 text-center">Horas</th>
+                <th class="py-3 px-4 font-semibold text-slate-700 text-right">Valor/hora (R$)</th>
+                <th class="py-3 px-4 font-semibold text-slate-700 text-right">Custo Total (R$)</th>
+              </tr></thead>
+              <tbody class="bg-white divide-y divide-slate-200">
+                {% for p in participacoes %}
+                <tr>
+                  <td class="py-3 px-4 font-medium text-slate-800">{{ p.funcao.nome }}</td>
+                  <td class="py-3 px-4 text-slate-600 text-center">{{ p.quantidade }}</td>
+                  <td class="py-3 px-4 text-slate-600 text-center">{{ p.horas }}</td>
+                  <td class="py-3 px-4 text-slate-600 text-right">{{ p.valor_hora|default:p.funcao.valor_hora_padrao }}</td>
+                  <td class="py-3 px-4 text-slate-600 text-right">{{ p.custo_total }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="py-8 text-center text-slate-500">Nenhuma função de equipe adicionada.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
 
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px 8px;
-      text-align: left;
-    }
+      <div class="lg:col-span-2 space-y-12">
+        <section>
+          <h2 class="text-xl font-semibold text-slate-800 mb-4">💰 Resumo de Custos</h2>
+          <div class="space-y-3 rounded-lg border border-slate-200 p-4 text-sm">
+            <div class="flex justify-between items-baseline"><span class="text-slate-500">Custo de Receitas</span><span class="font-medium text-slate-700">R$ {{ evento.custo_receitas }}</span></div>
+            <div class="flex justify-between items-baseline"><span class="text-slate-500">Custo de Mão de Obra</span><span class="font-medium text-slate-700">R$ {{ evento.custo_mao_obra_total }}</span></div>
+            <div class="flex justify-between items-baseline"><span class="text-slate-500">Custo Indireto</span><span class="font-medium text-slate-700">R$ {{ evento.custo_indireto }}</span></div>
+            <div class="flex justify-between items-baseline pt-2 border-t border-slate-200"><strong class="text-slate-800">Custo Total</strong><strong class="text-slate-800 text-base">R$ {{ evento.custo_total }}</strong></div>
+            <div class="flex justify-between items-baseline"><span class="text-slate-500">Margem de Lucro (%)</span><span class="font-medium text-slate-700">{{ evento.margem_lucro }} %</span></div>
+            <div class="flex justify-between items-baseline"><span class="text-slate-500">Preço de Venda Total</span><span class="font-medium text-slate-700">R$ {{ evento.preco_venda_total }}</span></div>
+            <div class="flex justify-between items-baseline"><span class="text-slate-500">Custo por Pessoa</span><span class="font-medium text-slate-700">R$ {{ evento.custo_por_pessoa }}</span></div>
+            <div class="flex justify-between items-baseline"><span class="text-slate-500">Preço por Pessoa</span><span class="font-medium text-slate-700">R$ {{ evento.preco_venda_por_pessoa }}</span></div>
+            <div class="flex justify-between items-baseline mt-2 pt-2 border-t border-amber-200 bg-amber-50 -mx-4 px-4 py-2 rounded-b-lg"><strong class="text-amber-800">Lucro Estimado</strong><strong class="text-amber-800 text-lg">R$ {{ evento.lucro_estimado }}</strong></div>
+          </div>
+        </section>
 
-    th {
-      background: #f2f2f2;
-      font-weight: bold;
-    }
+        <section>
+          <h2 class="text-xl font-semibold text-slate-800 mb-4">🛒 Lista de Compras</h2>
+          <div class="overflow-x-auto rounded-lg border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+              <thead class="bg-slate-50"><tr class="text-left">
+                <th class="py-3 px-4 font-semibold text-slate-700">Ingrediente</th>
+                <th class="py-3 px-4 font-semibold text-slate-700 text-right">Qtd Total</th>
+                <th class="py-3 px-4 font-semibold text-slate-700 text-right">Custo (R$)</th>
+              </tr></thead>
+              <tbody class="bg-white divide-y divide-slate-200">
+                {% for item in lista_compras %}
+                <tr>
+                  <td class="py-3 px-4 font-medium text-slate-800">{{ item.ingrediente }}</td>
+                  <td class="py-3 px-4 text-slate-600 text-right">{{ item.quantidade }} {{ item.unidade }}</td>
+                  <td class="py-3 px-4 text-slate-600 text-right">{{ item.custo_total }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="py-8 text-center text-slate-500">Nenhum ingrediente calculado.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-    .total {
-      font-weight: bold;
-      background: #e6f3ff;
-    }
-
-    .right { text-align: right; }
-    .center { text-align: center; }
-
-    .logo {
-      width: 140px;
-      float: right;
-    }
-
-    .header-info {
-      margin-bottom: 15px;
-    }
-
-    .footer {
-      margin-top: 50px;
-      font-size: 11px;
-      text-align: center;
-      color: #777;
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
-    }
-  </style>
-</head>
-
-<body>
-  <!-- Cabeçalho -->
-  <img src="{% static 'img/senac_logo.png' %}" class="logo" alt="SENAC">
-  <h1>Ficha Técnica de Evento</h1>
-
-  <div class="header-info">
-    <p><strong>Nome do Evento:</strong> {{ evento.nome }}</p>
-    <p><strong>Data:</strong> {{ evento.data|date:"d/m/Y" }}</p>
-    <p><strong>Nº de Pessoas:</strong> {{ evento.numero_pessoas }}</p>
+      </div>
+    </div>
   </div>
 
-  <!-- Cardápio -->
-  <h2>Cardápio</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Receita</th>
-        <th class="center">Porções/pessoa</th>
-        <th class="right">Custo Total (R$)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in itens %}
-      <tr>
-        <td>{{ item.receita.titulo }}</td>
-        <td class="center">{{ item.porcoes_por_pessoa }}</td>
-        <td class="right">{{ item.custo_total }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="3" class="center">Nenhum item de cardápio adicionado.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <footer class="mt-12 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <a href="{% url 'eventos:lista_eventos' %}" class="inline-flex items-center gap-2 rounded-md bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" /></svg>
+      Voltar à lista de eventos
+    </a>
+    <a href="?format=pdf" class="inline-flex items-center gap-2 rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M5 2.5a.5.5 0 01.5-.5h8a.5.5 0 01.5.5v2.512A4.502 4.502 0 0117.5 9.5v5.006c0 .185-.027.366-.078.536a.75.75 0 01-1.444.218A3.001 3.001 0 0013 12.5a3 3 0 00-3-3H4.872a.75.75 0 01-.68-.433l-1.58-3.16a.75.75 0 01.034-.736L4.21 2.62A.75.75 0 014.872 2.5H5zM6.5 5a.5.5 0 01.5-.5h4a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-4a.5.5 0 01-.5-.5V5z" clip-rule="evenodd" /></svg>
+      Exportar PDF
+    </a>
+  </footer>
 
-  <!-- Equipe -->
-  <h2>Equipe</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Função</th>
-        <th class="center">Qtd</th>
-        <th class="center">Horas</th>
-        <th class="right">Valor/hora (R$)</th>
-        <th class="right">Custo Total (R$)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for p in participacoes %}
-      <tr>
-        <td>{{ p.funcao.nome }}</td>
-        <td class="center">{{ p.quantidade }}</td>
-        <td class="center">{{ p.horas }}</td>
-        <td class="right">{{ p.valor_hora|default:p.funcao.valor_hora_padrao }}</td>
-        <td class="right">{{ p.custo_total }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="5" class="center">Nenhuma função de equipe adicionada.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <!-- Resumo de custos -->
-  <h2>Resumo de Custos</h2>
-  <table>
-    <tbody>
-      <tr><td>Custo de Receitas</td><td class="right">{{ evento.custo_receitas }}</td></tr>
-      <tr><td>Custo de Mão de Obra</td><td class="right">{{ evento.custo_mao_obra_total }}</td></tr>
-      <tr><td>Custo Indireto</td><td class="right">{{ evento.custo_indireto }}</td></tr>
-      <tr class="total"><td>Custo Total</td><td class="right">{{ evento.custo_total }}</td></tr>
-      <tr><td>Margem de Lucro (%)</td><td class="right">{{ evento.margem_lucro }}</td></tr>
-      <tr><td>Preço de Venda Total</td><td class="right">{{ evento.preco_venda_total }}</td></tr>
-      <tr><td>Custo por Pessoa</td><td class="right">{{ evento.custo_por_pessoa }}</td></tr>
-      <tr><td>Preço por Pessoa</td><td class="right">{{ evento.preco_venda_por_pessoa }}</td></tr>
-      <tr class="total"><td>Lucro Estimado</td><td class="right">{{ evento.lucro_estimado }}</td></tr>
-    </tbody>
-  </table>
-
-  <!-- Lista de Compras -->
-  <h2>Lista de Compras</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Ingrediente</th>
-        <th class="right">Quantidade Total</th>
-        <th class="center">Unidade</th>
-        <th class="right">Custo Total (R$)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in lista_compras %}
-      <tr>
-        <td>{{ item.ingrediente }}</td>
-        <td class="right">{{ item.quantidade }}</td>
-        <td class="center">{{ item.unidade }}</td>
-        <td class="right">{{ item.custo_total }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="4" class="center">Nenhum ingrediente calculado.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <!-- Rodapé -->
-  <div class="footer">
-    Sistema de Fichas Técnicas - Padrão SENAC<br>
-    Desenvolvido com Django | {{ now|date:"Y" }}
-  </div>
-</body>
-</html>
+</div>
+{% endblock %}
